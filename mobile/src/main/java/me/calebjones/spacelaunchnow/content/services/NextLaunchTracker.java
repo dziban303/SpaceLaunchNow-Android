@@ -1,6 +1,5 @@
 package me.calebjones.spacelaunchnow.content.services;
 
-
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.Notification;
@@ -30,7 +29,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.realm.Realm;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import me.calebjones.spacelaunchnow.R;
@@ -46,7 +44,6 @@ import me.calebjones.spacelaunchnow.widget.LaunchCardCompactWidgetProvider;
 import me.calebjones.spacelaunchnow.widget.LaunchTimerWidgetProvider;
 import me.calebjones.spacelaunchnow.widget.LaunchWordTimerWidgetProvider;
 import timber.log.Timber;
-
 
 public class NextLaunchTracker extends IntentService {
 
@@ -87,7 +84,6 @@ public class NextLaunchTracker extends IntentService {
         this.switchPreferences = SwitchPreferences.getInstance(getApplicationContext());
         this.sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         Calendar calDay = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         calDay.add(Calendar.HOUR, 72);
@@ -95,13 +91,13 @@ public class NextLaunchTracker extends IntentService {
         Date dateDay = new Date();
         dateDay = calDay.getTime();
 
-        if (switchPreferences.getAllSwitch()) {
-            launchRealms = realm.where(Launch.class)
-                    .between("net", date, dateDay)
-                    .findAllSorted("net", Sort.ASCENDING);
-        } else {
-            filterLaunchRealm(date, dateDay, realm);
-        }
+        launchRealms = realm.where(Launch.class)
+                .between("net", date, dateDay)
+                .beginGroup()
+                .equalTo("location.isSubscribed", true)
+                .or()
+                .equalTo("rocket.agencies.isSubscribed", true)
+                .findAllSorted("net", Sort.ASCENDING);
 
         if (launchRealms.size() > 0) {
             for (Launch realm : launchRealms) {
@@ -120,267 +116,23 @@ public class NextLaunchTracker extends IntentService {
     }
 
     private void updateWidgets() {
-        Intent cardIntent = new Intent(this,LaunchCardCompactWidgetProvider.class);
+        Intent cardIntent = new Intent(this, LaunchCardCompactWidgetProvider.class);
         cardIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         int cardIds[] = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), LaunchCardCompactWidgetProvider.class));
-        cardIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,cardIds);
+        cardIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, cardIds);
         sendBroadcast(cardIntent);
 
-        Intent timerIntent = new Intent(this,LaunchTimerWidgetProvider.class);
+        Intent timerIntent = new Intent(this, LaunchTimerWidgetProvider.class);
         timerIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         int timerIds[] = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), LaunchTimerWidgetProvider.class));
-        timerIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,timerIds);
+        timerIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, timerIds);
         sendBroadcast(timerIntent);
 
-        Intent wordIntent = new Intent(this,LaunchWordTimerWidgetProvider.class);
+        Intent wordIntent = new Intent(this, LaunchWordTimerWidgetProvider.class);
         wordIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
         int wordIds[] = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), LaunchWordTimerWidgetProvider.class));
-        wordIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,wordIds);
+        wordIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, wordIds);
         sendBroadcast(wordIntent);
-    }
-
-    private void filterLaunchRealm(Date date, Date dateDay, Realm realm) {
-        boolean first = true;
-        RealmQuery<Launch> query = realm.where(Launch.class)
-                .between("net", date, dateDay)
-                .beginGroup();
-        if (switchPreferences.getSwitchNasa()) {
-            first = false;
-            query.equalTo("rocket.agencies.id", 44)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 44);
-        }
-
-        if (switchPreferences.getSwitchArianespace()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 115)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 115);
-        }
-
-        if (switchPreferences.getSwitchSpaceX()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 121)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 121);
-        }
-
-        if (switchPreferences.getSwitchULA()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 124)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 124);
-        }
-
-        if (switchPreferences.getSwitchRoscosmos()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 111)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 111)
-                    .or()
-                    .equalTo("rocket.agencies.id", 163)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 163)
-                    .or()
-                    .equalTo("rocket.agencies.id", 63)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 63);
-        }
-        if (switchPreferences.getSwitchCASC()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 88)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 88);
-        }
-
-        if (switchPreferences.getSwitchISRO()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 31)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 31);
-        }
-
-        if (switchPreferences.getSwitchKSC()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("location.id", 17);
-        }
-
-        if (switchPreferences.getSwitchCape()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("location.id", 16);
-        }
-
-        if (switchPreferences.getSwitchPles()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("location.id", 11);
-        }
-
-        if (switchPreferences.getSwitchVan()) {
-            if (!first) {
-                query.or();
-            }
-            query.equalTo("location.id", 18);
-        }
-
-        launchRealms = query.endGroup().findAllSorted("net", Sort.ASCENDING);
-    }
-
-    private Launch filterLaunchRealm(Date date, Realm realm) {
-        boolean first = true;
-        RealmQuery<Launch> query = realm.where(Launch.class)
-                .greaterThan("net", date)
-                .beginGroup();
-        if (switchPreferences.getSwitchNasa()) {
-            first = false;
-            query.equalTo("rocket.agencies.id", 44)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 44);
-        }
-
-        if (switchPreferences.getSwitchArianespace()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 115)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 115);
-        }
-
-        if (switchPreferences.getSwitchSpaceX()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 121)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 121);
-        }
-
-        if (switchPreferences.getSwitchULA()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 124)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 124);
-        }
-
-        if (switchPreferences.getSwitchRoscosmos()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 111)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 111)
-                    .or()
-                    .equalTo("rocket.agencies.id", 163)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 163)
-                    .or()
-                    .equalTo("rocket.agencies.id", 63)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 63);
-        }
-        if (switchPreferences.getSwitchCASC()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 88)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 88);
-        }
-
-        if (switchPreferences.getSwitchISRO()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("rocket.agencies.id", 31)
-                    .or()
-                    .equalTo("location.pads.agencies.id", 31);
-        }
-
-        if (switchPreferences.getSwitchKSC()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("location.id", 17);
-        }
-
-        if (switchPreferences.getSwitchCape()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("location.id", 16);
-        }
-
-        if (switchPreferences.getSwitchPles()) {
-            if (!first) {
-                query.or();
-            } else {
-                first = false;
-            }
-            query.equalTo("location.id", 11);
-        }
-
-        if (switchPreferences.getSwitchVan()) {
-            if (!first) {
-                query.or();
-            }
-            query.equalTo("location.id", 18);
-        }
-
-        return query.endGroup().findFirst();
     }
 
     private void checkNextLaunches(Launch launch) {
@@ -516,7 +268,6 @@ public class NextLaunchTracker extends IntentService {
         String launchURL;
         String launchPad = launch.getLocation().getName();
 
-
         if (launch.getNet() != null) {
             //Get launch date
             if (sharedPref.getBoolean("local_time", true)) {
@@ -535,7 +286,6 @@ public class NextLaunchTracker extends IntentService {
         }
         mBuilder.setSubText(launchPad);
 
-
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
         mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -548,8 +298,10 @@ public class NextLaunchTracker extends IntentService {
         NotificationCompat.WearableExtender wearableExtender =
                 new NotificationCompat.WearableExtender()
                         .setHintHideIcon(true)
-                        .setBackground(BitmapFactory.decodeResource(this.getResources(),
-                                R.drawable.nav_header));
+                        .setBackground(BitmapFactory.decodeResource(
+                                this.getResources(),
+                                R.drawable.nav_header
+                        ));
 
         mBuilder.setContentTitle(launchName)
                 .setContentText(expandedText)
@@ -559,7 +311,6 @@ public class NextLaunchTracker extends IntentService {
                 .extend(wearableExtender)
                 .setContentIntent(appIntent)
                 .setSound(alarmSound);
-
 
         //Check if heads up notifications are enabled, set priority to high if so.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN &&
@@ -578,7 +329,6 @@ public class NextLaunchTracker extends IntentService {
                 && sharedPref.getBoolean("notifications_new_message_led", true)) {
             mBuilder.setLights(Color.GREEN, 3000, 3000);
         }
-
 
         if (sharedPref.getBoolean("notifications_new_message_webcast", false)) {
             if (launch.getVidURLs() != null && launch.getVidURLs().size() > 0) {
@@ -643,8 +393,10 @@ public class NextLaunchTracker extends IntentService {
         NotificationCompat.WearableExtender wearableExtender =
                 new NotificationCompat.WearableExtender()
                         .setHintHideIcon(true)
-                        .setBackground(BitmapFactory.decodeResource(this.getResources(),
-                                R.drawable.nav_header));
+                        .setBackground(BitmapFactory.decodeResource(
+                                this.getResources(),
+                                R.drawable.nav_header
+                        ));
 
         mBuilder.setContentTitle(launchName)
                 .setContentText(expandedText)
@@ -684,13 +436,13 @@ public class NextLaunchTracker extends IntentService {
     }
 
     public void scheduleUpdate(long interval) {
-        if (interval < 0){
+        if (interval < 0) {
             interval = Math.abs(interval);
-        } else if (interval == 0){
+        } else if (interval == 0) {
             interval = 360000;
         }
-            NextLaunchJob.scheduleJob(interval);
-            this.startService(new Intent(this, UpdateWearService.class));
+        NextLaunchJob.scheduleJob(interval);
+        this.startService(new Intent(this, UpdateWearService.class));
     }
 
 }

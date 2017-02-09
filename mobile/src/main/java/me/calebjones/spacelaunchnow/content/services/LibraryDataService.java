@@ -22,21 +22,26 @@ import java.util.Collections;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.RealmResults;
 import me.calebjones.spacelaunchnow.content.database.ListPreferences;
-import me.calebjones.spacelaunchnow.data.models.realm.Pad;
-import me.calebjones.spacelaunchnow.data.models.realm.RocketDetails;
-import me.calebjones.spacelaunchnow.data.networking.interfaces.APIRequestInterface;
-import me.calebjones.spacelaunchnow.data.networking.interfaces.LibraryRequestInterface;
 import me.calebjones.spacelaunchnow.content.models.Constants;
 import me.calebjones.spacelaunchnow.data.models.realm.Agency;
+import me.calebjones.spacelaunchnow.data.models.realm.AgencySwitch;
 import me.calebjones.spacelaunchnow.data.models.realm.Location;
+import me.calebjones.spacelaunchnow.data.models.realm.LocationSwitch;
 import me.calebjones.spacelaunchnow.data.models.realm.Mission;
+import me.calebjones.spacelaunchnow.data.models.realm.Pad;
 import me.calebjones.spacelaunchnow.data.models.realm.RealmStr;
-import me.calebjones.spacelaunchnow.data.models.realm.RocketFamily;
 import me.calebjones.spacelaunchnow.data.models.realm.Rocket;
+import me.calebjones.spacelaunchnow.data.models.realm.RocketDetails;
+import me.calebjones.spacelaunchnow.data.models.realm.RocketFamily;
+import me.calebjones.spacelaunchnow.data.networking.interfaces.APIRequestInterface;
+import me.calebjones.spacelaunchnow.data.networking.interfaces.LibraryRequestInterface;
 import me.calebjones.spacelaunchnow.data.networking.responses.base.VehicleResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.AgencyResponse;
+import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.AgencySwitchResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.LocationResponse;
+import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.LocationSwitchResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.MissionResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.PadResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.RocketFamilyResponse;
@@ -139,11 +144,12 @@ public class LibraryDataService extends IntentService {
                 listPreference.setLastVehicleUpdate(System.currentTimeMillis());
                 getAllAgency();
                 getAllLocations();
-                getAllMissions();
+                getAllAgencySwitches();
+                getAllLocationSwitches();
                 getAllPads();
+                syncPadsToLocations();
+                getAllMissions();
                 getBaseVehicleDetails();
-                getLibraryRockets();
-                getLibraryRocketsFamily();
             } else if (Constants.ACTION_GET_AGENCY.equals(action)) {
                 getAllAgency();
             } else if (Constants.ACTION_GET_MISSION.equals(action)){
@@ -162,7 +168,61 @@ public class LibraryDataService extends IntentService {
                 getLibraryRocketsFamily();
             }
         }
+        syncSwitchState(mRealm);
         mRealm.close();
+    }
+
+    private static void syncSwitchState(Realm realm) {
+        RealmResults<LocationSwitch> locationSwitches = realm.where(LocationSwitch.class).findAll();
+        RealmResults<AgencySwitch> agencySwitches = realm.where(AgencySwitch.class).findAll();
+
+        for (LocationSwitch locationSwitch : locationSwitches) {
+            Location location = realm.where(Location.class).equalTo("id", locationSwitch.getId()).findFirst();
+            if (location != null) {
+                realm.beginTransaction();
+                location.setSubscribed(locationSwitch.isSubscribed());
+                realm.copyToRealmOrUpdate(location);
+                realm.commitTransaction();
+            }
+        }
+
+        for (AgencySwitch locationSwitch : agencySwitches) {
+            Agency agency = realm.where(Agency.class).equalTo("id", locationSwitch.getId()).findFirst();
+            if (agency != null) {
+                realm.beginTransaction();
+                agency.setSubscribed(locationSwitch.isSubscribed());
+                realm.copyToRealmOrUpdate(agency);
+                realm.commitTransaction();
+            }
+        }
+    }
+
+    private void syncPadsToLocations() {
+        mRealm.beginTransaction();
+        RealmResults<Location> locationResults = mRealm.where(Location.class).findAll();
+        RealmList<Location> locations = new RealmList<>();
+
+        locations.addAll(locationResults.subList(0, locationResults.size()));
+        for (Location location: locations){
+            RealmList<Pad> pads = new RealmList<>();
+            RealmResults<Pad> padsResults = mRealm.where(Pad.class).equalTo("locationid", location.getId()).findAll();
+            pads.addAll(padsResults.subList(0, padsResults.size()));
+            location.addPads(pads);
+            mRealm.copyToRealmOrUpdate(location);
+        }
+
+        RealmResults<LocationSwitch> locationSwitchResults = mRealm.where(LocationSwitch.class).findAll();
+        RealmList<LocationSwitch> locationSwitches = new RealmList<>();
+
+        locationSwitches.addAll(locationSwitchResults.subList(0, locationSwitchResults.size()));
+        for (LocationSwitch location : locationSwitches) {
+            RealmList<Pad> pads = new RealmList<>();
+            RealmResults<Pad> padsResults = mRealm.where(Pad.class).equalTo("locationid", location.getId()).findAll();
+            pads.addAll(padsResults.subList(0, padsResults.size()));
+            location.addPads(pads);
+            mRealm.copyToRealmOrUpdate(location);
+        }
+        mRealm.commitTransaction();
     }
 
     private void getAllAgency() {
@@ -200,6 +260,45 @@ public class LibraryDataService extends IntentService {
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(Constants.ACTION_FAILURE_AGENCY);
             LibraryDataService.this.getApplicationContext().sendBroadcast(broadcastIntent);
+        }
+    }
+
+    private void getAllAgencySwitches() {
+        LibraryRequestInterface request = libraryRetrofit.create(LibraryRequestInterface.class);
+        Call<AgencySwitchResponse> call;
+        Response<AgencySwitchResponse> launchResponse;
+        RealmList<AgencySwitch> items = new RealmList<>();
+        int offset = 0;
+        int total = 10;
+        int count;
+
+        try {
+            while (total != offset) {
+                if (listPreference.isDebugEnabled()) {
+                    call = request.getDebugAllAgencySwitch(offset);
+                } else {
+                    call = request.getAllAgencySwitch(offset);
+                }
+                launchResponse = call.execute();
+                total = launchResponse.body().getTotal();
+                count = launchResponse.body().getCount();
+                offset = offset + count;
+                Collections.addAll(items, launchResponse.body().getAgencies());
+            }
+            mRealm.beginTransaction();
+            for (AgencySwitch item : items) {
+                AgencySwitch previous = mRealm.where(AgencySwitch.class)
+                        .equalTo("id", item.getId())
+                        .findFirst();
+                if (previous != null) {
+                    item.setSubscribed(previous.isSubscribed());
+                }
+                mRealm.copyToRealmOrUpdate(item);
+            }
+            mRealm.commitTransaction();
+
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 
@@ -241,6 +340,8 @@ public class LibraryDataService extends IntentService {
         }
     }
 
+
+
     private void getAllLocations() {
         LibraryRequestInterface request = libraryRetrofit.create(LibraryRequestInterface.class);
         Call<LocationResponse> call;
@@ -264,7 +365,15 @@ public class LibraryDataService extends IntentService {
                 Collections.addAll(items, launchResponse.body().getLocations());
             }
             mRealm.beginTransaction();
-            mRealm.copyToRealmOrUpdate(items);
+            for (Location item : items) {
+                Location previous = mRealm.where(Location.class)
+                        .equalTo("id", item.getId())
+                        .findFirst();
+                if (previous != null) {
+                    item.setSubscribed(previous.isSubscribed());
+                }
+                mRealm.copyToRealmOrUpdate(item);
+            }
             mRealm.commitTransaction();
 
             Intent broadcastIntent = new Intent();
@@ -276,6 +385,47 @@ public class LibraryDataService extends IntentService {
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(Constants.ACTION_FAILURE_LOCATION);
             LibraryDataService.this.getApplicationContext().sendBroadcast(broadcastIntent);
+        }
+    }
+
+    private void getAllLocationSwitches() {
+        LibraryRequestInterface request = libraryRetrofit.create(LibraryRequestInterface.class);
+        Call<LocationSwitchResponse> call;
+        Response<LocationSwitchResponse> launchResponse;
+        RealmList<LocationSwitch> items = new RealmList<>();
+        int offset = 0;
+        int total = 10;
+        int count;
+
+        try {
+            while (total != offset) {
+                if (listPreference.isDebugEnabled()) {
+                    call = request.getDebugLocationsSwitches(offset);
+                } else {
+                    call = request.getLocationsSwitches(offset);
+                }
+                launchResponse = call.execute();
+                total = launchResponse.body().getTotal();
+                count = launchResponse.body().getCount();
+                offset = offset + count;
+                Collections.addAll(items, launchResponse.body().getLocations());
+            }
+            mRealm.beginTransaction();
+            for (LocationSwitch item : items) {
+                LocationSwitch previous = mRealm.where(LocationSwitch.class)
+                        .equalTo("id", item.getId())
+                        .findFirst();
+                if (previous != null) {
+                    item.setSubscribed(previous.isSubscribed());
+                    mRealm.copyToRealmOrUpdate(item);
+                } else {
+                    mRealm.copyToRealmOrUpdate(item);
+                }
+            }
+            mRealm.commitTransaction();
+
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 

@@ -1,8 +1,10 @@
 package me.calebjones.spacelaunchnow.data.networking.interfaces;
 
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.AgencyResponse;
+import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.AgencySwitchResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.LaunchResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.LocationResponse;
+import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.LocationSwitchResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.MissionResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.PadResponse;
 import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.RocketFamilyResponse;
@@ -80,6 +82,12 @@ public interface LibraryRequestInterface {
     @GET("dev/agency?mode=verbose")
     Call<AgencyResponse> getDebugAllAgency(@Query("offset") int offset);
 
+    @GET(version + "/agency?mode=verbose")
+    Call<AgencySwitchResponse> getAllAgencySwitch(@Query("offset") int offset);
+
+    @GET("dev/agency?mode=verbose")
+    Call<AgencySwitchResponse> getDebugAllAgencySwitch(@Query("offset") int offset);
+
     @GET(version + "/agency/{agencyID}?mode=verbose")
     Call<AgencyResponse> getAgencyByID(@Path("agencyID") int agencyID);
 
@@ -121,6 +129,12 @@ public interface LibraryRequestInterface {
 
     @GET("dev/location?mode=verbose")
     Call<LocationResponse> getDebugLocations(@Query("offset") int offset);
+
+    @GET(version + "/location?mode=verbose")
+    Call<LocationSwitchResponse> getLocationsSwitches(@Query("offset") int offset);
+
+    @GET("dev/location?mode=verbose")
+    Call<LocationSwitchResponse> getDebugLocationsSwitches(@Query("offset") int offset);
 
     @GET(version + "/location/{locationId}?mode=verbose")
     Call<LocationResponse> getLocationsById(@Path("locationId") int locationId);

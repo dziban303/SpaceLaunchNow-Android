@@ -85,6 +85,21 @@ public final class Constants {
     public static final String DYNAMIC_KEY = "me.calebjones.spacelaunchnow.wear.textdynamic";
     public static final String BACKGROUND_KEY = "me.calebjones.spacelaunchnow.wear.background";
 
+    public static int AGENCY_ARIANESPACE = 115;
+    public static int[] LOCATION_CASC = {1,2};
+    public static int AGENCY_ISRO = 31;
+    public static int LOCATION_CAPE = 16;
+    public static int AGENCY_NASA = 44;
+    public static int AGENCY_SPACEX = 121;
+    public static int[] LOCATION_ROSCOSMOS = {14, 12, 11, 34, 10, 13};
+    public static int[] AGENCY_ROSCOSMOS = {96, 111, 163, 63};
+    public static int AGENCY_ULA = 124;
+    public static int LOCATION_KSC = 17;
+    public static int LOCATION_VAN = 18;
+    public static int AGENCY_ORBITAL_ATK = 179;
+
+
+
     private Constants() {
     }
 

@@ -175,7 +175,7 @@ public class LaunchApplication extends Application {
         if (!sharedPreference.getFirstBoot()) {
             //Module changes, requires migration.
             Timber.v("Stored Version Code: %s", switchPreferences.getVersionCode());
-            if (switchPreferences.getVersionCode() <= DB_SCHEMA_VERSION){
+            if (switchPreferences.getVersionCode() < DB_SCHEMA_VERSION){
                 Intent intent = new Intent(this, LaunchDataService.class);
                 intent.setAction(Constants.ACTION_GET_ALL_DATA);
                 this.startService(intent);

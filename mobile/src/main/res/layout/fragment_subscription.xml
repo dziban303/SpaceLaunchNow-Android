@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/subscription_coordinator_layout"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/primary">
+
+  <android.support.v4.widget.NestedScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_marginLeft="24dp"
+      android:layout_marginRight="24dp"
+      android:layout_marginTop="16dp"
+      android:orientation="vertical">
+
+      <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Select Launches to Follow"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:textColor="@color/white"
+        android:textSize="30dp"
+        android:typeface="sans" />
+
+      <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Your selections will be visible on the home page and send notifications before launch."
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:typeface="sans" />
+
+      <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/material_baseline_grid_1x"
+        android:orientation="vertical">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Recommendations"
+          android:textAppearance="@style/TextAppearance.AppCompat.Title"
+          android:textColor="@color/white"
+          android:textSize="24dp"
+          android:typeface="sans" />
+
+        <View
+          android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:layout_marginTop="8dp"
+          android:background="@color/white"
+          android:padding="12dp" />
+
+        <LinearLayout
+          android:layout_width="fill_parent"
+          android:layout_height="fill_parent"
+          android:orientation="horizontal">
+
+          <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/nasa_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="NASA"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/spacex_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="SpaceX"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/roscosmos_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="ROSCOSMOS"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/ula_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="ULA"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/KSC_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="Kennedy Space Center"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/orbital_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="Orbital ATK"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/arianespace_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="Arianespace"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/casc_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="CASC"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/isro_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="ISRO"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/cape_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="Cape Canaveral"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+
+            <android.support.v7.widget.AppCompatCheckBox
+              android:id="@+id/van_switch"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="@dimen/material_baseline_grid_0.5x"
+              android:checked="false"
+              android:text="Vandenberg AFB"
+              android:textColor="@color/white"
+              app:buttonTint="@color/white" />
+          </LinearLayout>
+        </LinearLayout>
+
+      </LinearLayout>
+
+
+      <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/material_baseline_grid_1x"
+        android:orientation="vertical">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Locations"
+          android:textAppearance="@style/TextAppearance.AppCompat.Title"
+          android:textColor="@color/white"
+          android:textSize="24dp"
+          android:typeface="sans" />
+
+
+        <View
+          android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:layout_marginTop="8dp"
+          android:background="@color/white"
+          android:padding="12dp" />
+
+        <LinearLayout
+          android:id="@+id/location_view"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_margin="@dimen/material_baseline_grid_1x"
+          android:orientation="vertical" />
+
+      </LinearLayout>
+
+      <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/material_baseline_grid_1x"
+        android:orientation="vertical">
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Agencies"
+          android:textAppearance="@style/TextAppearance.AppCompat.Title"
+          android:textColor="@color/white"
+          android:textSize="24dp"
+          android:typeface="sans" />
+
+        <View
+          android:layout_width="match_parent"
+          android:layout_height="2dp"
+          android:layout_marginTop="8dp"
+          android:background="@color/white"
+          android:padding="12dp" />
+
+        <LinearLayout
+          android:id="@+id/agency_view"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_margin="@dimen/material_baseline_grid_1x"
+          android:orientation="vertical" />
+
+      </LinearLayout>
+    </LinearLayout>
+  </android.support.v4.widget.NestedScrollView>
+</android.support.design.widget.CoordinatorLayout>

@@ -1,14 +1,10 @@
 package me.calebjones.spacelaunchnow.main.upcoming;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -17,7 +13,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -26,7 +21,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
@@ -37,17 +31,10 @@ import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 
-import java.util.Date;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import me.calebjones.spacelaunchnow.BuildConfig;
 import me.calebjones.spacelaunchnow.R;
-import me.calebjones.spacelaunchnow.calendar.CalendarSyncService;
 import me.calebjones.spacelaunchnow.common.BaseFragment;
 import me.calebjones.spacelaunchnow.content.database.ListPreferences;
 import me.calebjones.spacelaunchnow.content.database.SwitchPreferences;
@@ -57,36 +44,12 @@ import me.calebjones.spacelaunchnow.content.util.QueryBuilder;
 import me.calebjones.spacelaunchnow.data.models.realm.Launch;
 import me.calebjones.spacelaunchnow.debug.DebugActivity;
 import me.calebjones.spacelaunchnow.main.MainActivity;
+import me.calebjones.spacelaunchnow.subscriptions.SubscriptionActivity;
 import me.calebjones.spacelaunchnow.utils.SnackbarHandler;
 import me.calebjones.spacelaunchnow.utils.Utils;
 import timber.log.Timber;
 
 public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener {
-
-    @BindView(R.id.van_switch)
-    AppCompatCheckBox vanSwitch;
-    @BindView(R.id.ples_switch)
-    AppCompatCheckBox plesSwitch;
-    @BindView(R.id.KSC_switch)
-    AppCompatCheckBox kscSwitch;
-    @BindView(R.id.cape_switch)
-    AppCompatCheckBox capeSwitch;
-    @BindView(R.id.nasa_switch)
-    AppCompatCheckBox nasaSwitch;
-    @BindView(R.id.spacex_switch)
-    AppCompatCheckBox spacexSwitch;
-    @BindView(R.id.roscosmos_switch)
-    AppCompatCheckBox roscosmosSwitch;
-    @BindView(R.id.ula_switch)
-    AppCompatCheckBox ulaSwitch;
-    @BindView(R.id.arianespace_switch)
-    AppCompatCheckBox arianespaceSwitch;
-    @BindView(R.id.casc_switch)
-    AppCompatCheckBox cascSwitch;
-    @BindView(R.id.isro_switch)
-    AppCompatCheckBox isroSwitch;
-    @BindView(R.id.all_switch)
-    AppCompatCheckBox customSwitch;
 
     private View view;
     private RecyclerView mRecyclerView;
@@ -96,7 +59,6 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
     private LinearLayoutManager linearLayoutManager;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private CoordinatorLayout coordinatorLayout;
-    private View color_reveal;
     private View no_data;
     private FloatingActionButton FABMenu;
     private Menu mMenu;
@@ -157,20 +119,11 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
             }
         }
 
-        if (sharedPreference.isNightModeActive(context)) {
-            color = R.color.darkPrimary;
-        } else {
-            color = R.color.colorPrimary;
-        }
-
-
         sharedPreference = ListPreferences.getInstance(context);
 
         if (!BuildConfig.DEBUG) {
             if (!BuildConfig.DEBUG) {
-                Answers.getInstance().logContentView(new ContentViewEvent()
-                        .putContentName("NextLaunchFragment")
-                        .putContentType("Fragment"));
+                Answers.getInstance().logContentView(new ContentViewEvent().putContentName("NextLaunchFragment").putContentType("Fragment"));
             }
         }
 
@@ -180,46 +133,8 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
 
         LayoutInflater lf = getActivity().getLayoutInflater();
         view = lf.inflate(R.layout.fragment_upcoming, container, false);
-        ButterKnife.bind(this, view);
 
-        setUpSwitches();
         no_data = view.findViewById(R.id.no_launches);
-        color_reveal = view.findViewById(R.id.color_reveal);
-        color_reveal.setBackgroundColor(ContextCompat.getColor(context, color));
-        FABMenu = (FloatingActionButton) view.findViewById(R.id.menu);
-        FABMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setUpSwitches();
-                if (!active) {
-                    switchChanged = false;
-                    active = true;
-                    mSwipeRefreshLayout.setEnabled(false);
-                    FABMenu.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_close));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        showView();
-                    } else {
-                        color_reveal.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    active = false;
-                    FABMenu.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_filter));
-                    mSwipeRefreshLayout.setEnabled(true);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        hideView();
-                    } else {
-                        color_reveal.setVisibility(View.INVISIBLE);
-                    }
-                    if (switchChanged) {
-                        showLoading();
-                        displayLaunches();
-                        if (switchPreferences.getCalendarStatus()) {
-                            CalendarSyncService.startActionResync(context);
-                        }
-                    }
-                }
-            }
-        });
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -236,7 +151,6 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
                 super.onScrollStateChanged(recyclerView, newState);
             }
         });
-
 
         //If preference is for small card, landscape tablets get three others get two.
         if (cardSizeSmall) {
@@ -315,6 +229,9 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
                 } else {
                     adapter.addItems(results);
                 }
+            } else if (results.size() == 0){
+                //Enable no data by default
+                no_data.setVisibility(View.VISIBLE);
             } else {
                 adapter.clear();
             }
@@ -325,24 +242,14 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
 
     public void displayLaunches() {
         Timber.v("loadLaunches - showLoading");
-        Date date = new Date();
-
-        if (switchPreferences.getAllSwitch()) {
-            launchRealms = getRealm().where(Launch.class)
-                    .greaterThanOrEqualTo("net", date)
-                    .findAllSortedAsync("net", Sort.ASCENDING);
-            launchRealms.addChangeListener(callback);
-            Timber.v("loadLaunches - Realm query created.");
-        } else {
-            filterLaunchRealm();
-            Timber.v("loadLaunches - Filtered Realm query created.");
-        }
+        filterLaunchRealm();
     }
 
     private void setLayoutManager(int size) {
         if (getResources().getBoolean(R.bool.landscape) && getResources().getBoolean(R.bool.isTablet) && (launchRealms != null && launchRealms.size() == 1 || size == 1)) {
             linearLayoutManager = new LinearLayoutManager(context.getApplicationContext(),
-                    LinearLayoutManager.VERTICAL, false);
+                                                          LinearLayoutManager.VERTICAL, false
+            );
             mRecyclerView.setLayoutManager(linearLayoutManager);
             if (cardSizeSmall) {
                 mRecyclerView.setAdapter(smallAdapter);
@@ -361,76 +268,8 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
     }
 
     private void filterLaunchRealm() {
-        launchRealms = QueryBuilder.buildSwitchQueryAsync(context, getRealm());
+        launchRealms = QueryBuilder.buildSwitchQueryAsync(getRealm());
         launchRealms.addChangeListener(callback);
-    }
-
-    private void setUpSwitches() {
-        customSwitch.setChecked(switchPreferences.getAllSwitch());
-        nasaSwitch.setChecked(switchPreferences.getSwitchNasa());
-        spacexSwitch.setChecked(switchPreferences.getSwitchSpaceX());
-        roscosmosSwitch.setChecked(switchPreferences.getSwitchRoscosmos());
-        ulaSwitch.setChecked(switchPreferences.getSwitchULA());
-        arianespaceSwitch.setChecked(switchPreferences.getSwitchArianespace());
-        cascSwitch.setChecked(switchPreferences.getSwitchCASC());
-        isroSwitch.setChecked(switchPreferences.getSwitchISRO());
-        plesSwitch.setChecked(switchPreferences.getSwitchPles());
-        capeSwitch.setChecked(switchPreferences.getSwitchCape());
-        vanSwitch.setChecked(switchPreferences.getSwitchVan());
-        kscSwitch.setChecked(switchPreferences.getSwitchKSC());
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void hideView() {
-
-        // get the center for the clipping circle
-        int x = (int) (FABMenu.getX() + FABMenu.getWidth() / 2);
-        int y = (int) (FABMenu.getY() + FABMenu.getHeight() / 2);
-
-        // get the initial radius for the clipping circle
-        int initialRadius = Math.max(color_reveal.getWidth(), color_reveal.getHeight());
-
-        // create the animation (the final radius is zero)
-        Animator anim =
-                ViewAnimationUtils.createCircularReveal(color_reveal, x, y, initialRadius, 0);
-
-        // make the view invisible when the animation is done
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                color_reveal.setVisibility(View.INVISIBLE);
-            }
-        });
-
-        // start the animation
-        anim.start();
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void showView() {
-
-        // get the center for the clipping circle
-        int x = (int) (FABMenu.getX() + FABMenu.getWidth() / 2);
-        int y = (int) (FABMenu.getY() + FABMenu.getHeight() / 2);
-
-        // get the final radius for the clipping circle
-        int finalRadius = Math.max(color_reveal.getWidth(), color_reveal.getHeight());
-
-        // create the animator for this view (the start radius is zero)
-        Animator anim =
-                ViewAnimationUtils.createCircularReveal(color_reveal, x, y, 0, finalRadius);
-
-        // make the view invisible when the animation is done
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-            }
-        });
-
-        color_reveal.setVisibility(View.VISIBLE);
-        anim.start();
     }
 
     public void fetchData() {
@@ -462,7 +301,6 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
         progressView.resetAnimation();
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -483,7 +321,7 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
 
             //build 87 is where Realm change happened
         } else if (switchPreferences.getVersionCode() <= 87) {
-            Toast.makeText(context,"Upgraded from a legacy build, might need to refresh data manually.", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Upgraded from a legacy build, might need to refresh data manually.", Toast.LENGTH_LONG).show();
 
             //Upgrade post Realm change.
         } else if (Utils.getVersionCode(context) != switchPreferences.getVersionCode()) {
@@ -607,38 +445,13 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.debug_menu){
+        if (id == R.id.debug_menu) {
             Intent debugIntent = new Intent(getActivity(), DebugActivity.class);
             startActivity(debugIntent);
 
         } else if (id == R.id.action_alert) {
-            if (!active) {
-                switchChanged = false;
-                active = true;
-                mSwipeRefreshLayout.setEnabled(false);
-                FABMenu.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_close));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    showView();
-                } else {
-                    color_reveal.setVisibility(View.VISIBLE);
-                }
-            } else {
-                active = false;
-                FABMenu.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_add_alert));
-                mSwipeRefreshLayout.setEnabled(true);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    hideView();
-                } else {
-                    color_reveal.setVisibility(View.INVISIBLE);
-                }
-                if (switchChanged) {
-                    showLoading();
-                    displayLaunches();
-                    if (switchPreferences.getCalendarStatus()) {
-                        CalendarSyncService.startActionResync(context);
-                    }
-                }
-            }
+            Intent subscriptionIntent = new Intent(getActivity(), SubscriptionActivity.class);
+            startActivity(subscriptionIntent);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -647,105 +460,6 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
     public void onDestroyView() {
         super.onDestroyView();
         Timber.v("onDestroyView");
-    }
-
-    private void confirm() {
-        if (!switchChanged) {
-            FABMenu.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_check));
-        }
-        switchChanged = true;
-    }
-
-    private void checkAll() {
-        if (switchPreferences.getAllSwitch()) {
-            switchPreferences.setAllSwitch(false);
-            customSwitch.setChecked(false);
-        }
-    }
-
-    @OnClick(R.id.nasa_switch)
-    public void nasa_switch() {
-        confirm();
-        switchPreferences.setSwitchNasa(!switchPreferences.getSwitchNasa());
-        checkAll();
-    }
-
-
-    @OnClick(R.id.spacex_switch)
-    public void spacex_switch() {
-        confirm();
-        switchPreferences.setSwitchSpaceX(!switchPreferences.getSwitchSpaceX());
-        checkAll();
-    }
-
-    @OnClick(R.id.roscosmos_switch)
-    public void roscosmos_switch() {
-        confirm();
-        switchPreferences.setSwitchRoscosmos(!switchPreferences.getSwitchRoscosmos());
-        checkAll();
-    }
-
-    @OnClick(R.id.ula_switch)
-    public void ula_switch() {
-        confirm();
-        switchPreferences.setSwitchULA(!switchPreferences.getSwitchULA());
-        checkAll();
-    }
-
-    @OnClick(R.id.arianespace_switch)
-    public void arianespace_switch() {
-        confirm();
-        switchPreferences.setSwitchArianespace(!switchPreferences.getSwitchArianespace());
-        checkAll();
-    }
-
-    @OnClick(R.id.casc_switch)
-    public void casc_switch() {
-        confirm();
-        switchPreferences.setSwitchCASC(!switchPreferences.getSwitchCASC());
-        checkAll();
-    }
-
-    @OnClick(R.id.isro_switch)
-    public void isro_switch() {
-        confirm();
-        switchPreferences.setSwitchISRO(!switchPreferences.getSwitchISRO());
-        checkAll();
-    }
-
-    @OnClick(R.id.KSC_switch)
-    public void KSC_switch() {
-        confirm();
-        switchPreferences.setSwitchKSC(!switchPreferences.getSwitchKSC());
-        checkAll();
-    }
-
-    @OnClick(R.id.ples_switch)
-    public void ples_switch() {
-        confirm();
-        switchPreferences.setSwitchPles(plesSwitch.isChecked());
-        checkAll();
-    }
-
-    @OnClick(R.id.van_switch)
-    public void van_switch() {
-        confirm();
-        switchPreferences.setSwitchVan(!switchPreferences.getSwitchVan());
-        checkAll();
-    }
-
-    @OnClick(R.id.cape_switch)
-    public void cape_switch() {
-        confirm();
-        switchPreferences.setSwitchCape(!switchPreferences.getSwitchCape());
-        checkAll();
-    }
-
-    @OnClick(R.id.all_switch)
-    public void all_switch() {
-        confirm();
-        switchPreferences.setAllSwitch(!switchPreferences.getAllSwitch());
-        setUpSwitches();
     }
 }
 

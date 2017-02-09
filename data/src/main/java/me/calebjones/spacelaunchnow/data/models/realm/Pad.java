@@ -10,6 +10,9 @@ public class Pad extends RealmObject {
     @PrimaryKey
     private Integer id;
     private Integer padType;
+    private Integer locationid;
+    private Integer retired;
+
     private String name;
     private String infoURL;
     private String wikiURL;
@@ -17,7 +20,6 @@ public class Pad extends RealmObject {
     private Double latitude;
     private Double longitude;
     private RealmList<Agency> agencies = new RealmList<>();
-
     public Integer getId() {
         return id;
     }
@@ -88,5 +90,21 @@ public class Pad extends RealmObject {
 
     public void setPadType(Integer padType) {
         this.padType = padType;
+    }
+
+    public Integer getRetired() {
+        return retired;
+    }
+
+    public void setRetired(Integer retired) {
+        this.retired = retired;
+    }
+
+    public Integer getLocationid() {
+        return locationid;
+    }
+
+    public void setLocationid(Integer locationid) {
+        this.locationid = locationid;
     }
 }

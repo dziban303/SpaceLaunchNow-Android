@@ -17,17 +17,15 @@ import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import me.calebjones.spacelaunchnow.R;
 import me.calebjones.spacelaunchnow.content.database.ListPreferences;
 import me.calebjones.spacelaunchnow.content.database.SwitchPreferences;
 import me.calebjones.spacelaunchnow.content.models.Constants;
-import me.calebjones.spacelaunchnow.data.models.realm.Launch;
 import me.calebjones.spacelaunchnow.content.util.QueryBuilder;
+import me.calebjones.spacelaunchnow.data.models.realm.Launch;
 import me.calebjones.spacelaunchnow.launchdetail.activity.LaunchDetailActivity;
 import me.calebjones.spacelaunchnow.utils.Utils;
 import timber.log.Timber;
-
 
 public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
 
@@ -41,7 +39,7 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         Timber.v("onUpdate");
-        if (!ListPreferences.getInstance(context).getFirstBoot()){
+        if (!ListPreferences.getInstance(context).getFirstBoot()) {
             final int count = appWidgetIds.length;
 
             for (int widgetId : appWidgetIds) {
@@ -64,8 +62,10 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
                 mRealm.close();
             }
         } else {
-            setRefreshIntentInitial(context, new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_card_compact_dark));
+            setRefreshIntentInitial(context, new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_card_compact_dark
+            ));
         }
     }
 
@@ -79,16 +79,7 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
             mRealm = Realm.getDefaultInstance();
         }
 
-        RealmResults<Launch> launchRealms;
-        if (switchPreferences.getAllSwitch()) {
-            launchRealms = mRealm.where(Launch.class)
-                    .greaterThanOrEqualTo("net", date)
-                    .findAllSorted("net", Sort.ASCENDING);
-            Timber.v("loadLaunches - Realm query created.");
-        } else {
-            launchRealms = QueryBuilder.buildSwitchQuery(context, mRealm);
-            Timber.v("loadLaunches - Filtered Realm query created.");
-        }
+        RealmResults<Launch> launchRealms = QueryBuilder.buildSwitchQuery(mRealm);
 
         for (Launch launch : launchRealms) {
             if (launch.getNetstamp() != 0) {
@@ -111,14 +102,20 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
             Launch launch = getLaunch(context);
 
             if (minWidth <= 200 || minHeight <= 100) {
-                remoteViews = new RemoteViews(context.getPackageName(),
-                        R.layout.widget_launch_card_compact_small_dark);
+                remoteViews = new RemoteViews(
+                        context.getPackageName(),
+                        R.layout.widget_launch_card_compact_small_dark
+                );
             } else if (minWidth <= 320) {
-                remoteViews = new RemoteViews(context.getPackageName(),
-                        R.layout.widget_launch_card_compact_dark);
+                remoteViews = new RemoteViews(
+                        context.getPackageName(),
+                        R.layout.widget_launch_card_compact_dark
+                );
             } else {
-                remoteViews = new RemoteViews(context.getPackageName(),
-                        R.layout.widget_launch_card_compact_large_dark);
+                remoteViews = new RemoteViews(
+                        context.getPackageName(),
+                        R.layout.widget_launch_card_compact_large_dark
+                );
             }
 
             if (minWidth > 0 && maxWidth > 0 && minHeight > 0 && maxHeight > 0) {
@@ -136,8 +133,10 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
                 pushWidgetUpdate(context, remoteViews);
             }
         } else {
-            setRefreshIntentInitial(context, new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_card_compact_dark));
+            setRefreshIntentInitial(context, new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_card_compact_dark
+            ));
         }
     }
 
@@ -156,7 +155,7 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.widget_compact_card_frame, actionPendingIntent);
     }
 
-    private void setRefreshIntentInitial(Context context,RemoteViews remoteViews) {
+    private void setRefreshIntentInitial(Context context, RemoteViews remoteViews) {
         Intent nextIntent = new Intent(Constants.ACTION_CHECK_NEXT_LAUNCH_TIMER);
         PendingIntent refreshPending = PendingIntent.getBroadcast(context, 0, nextIntent, 0);
 
@@ -165,7 +164,7 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
-        updateAppWidget(context,appWidgetManager, appWidgetId, newOptions);
+        updateAppWidget(context, appWidgetManager, appWidgetId, newOptions);
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
     }
 
@@ -175,7 +174,7 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
     public void setLocationName(Context context, Launch launchRealm, RemoteViews remoteViews, Bundle options) {
         String locationName = null;
 
-        if (launchRealm.getLocation() != null && launchRealm.getLocation().getName() != null){
+        if (launchRealm.getLocation() != null && launchRealm.getLocation().getName() != null) {
             locationName = launchRealm.getLocation().getName();
         }
 
@@ -253,7 +252,7 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
         return Utils.DateToCalendar(date);
     }
 
-    public static void pushWidgetUpdate(Context context, RemoteViews remoteViews){
+    public static void pushWidgetUpdate(Context context, RemoteViews remoteViews) {
         ComponentName myWidget = new ComponentName(context, LaunchCardCompactWidgetProvider.class);
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         manager.updateAppWidget(myWidget, remoteViews);
@@ -272,9 +271,11 @@ public class LaunchCardCompactWidgetProvider extends AppWidgetProvider {
             } else {
                 super.onReceive(context, intent);
             }
-        } else{
-            setRefreshIntentInitial(context, new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_card_compact_dark));
+        } else {
+            setRefreshIntentInitial(context, new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_card_compact_dark
+            ));
         }
     }
 }

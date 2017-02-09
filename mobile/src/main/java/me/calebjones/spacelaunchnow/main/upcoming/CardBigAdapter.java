@@ -138,7 +138,7 @@ public class CardBigAdapter extends RecyclerView.Adapter<CardBigAdapter.ViewHold
 
             double dlat = 0;
             double dlon = 0;
-            if (launchItem.getLocation() != null && launchItem.getLocation().getPads() != null) {
+            if (launchItem.getLocation() != null && launchItem.getLocation().getPads() != null && launchItem.getLocation().getPads().size() > 0) {
                 dlat = launchItem.getLocation().getPads().get(0).getLatitude();
                 dlon = launchItem.getLocation().getPads().get(0).getLongitude();
             }

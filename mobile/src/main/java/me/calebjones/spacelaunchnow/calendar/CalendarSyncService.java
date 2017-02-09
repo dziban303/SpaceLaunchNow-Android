@@ -111,7 +111,7 @@ public class CalendarSyncService extends BaseService {
     private void handleActionSyncAll() {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         if (switchPreferences.getCalendarStatus()) {
-            launchRealms = QueryBuilder.buildSwitchQuery(this, mRealm);
+            launchRealms = QueryBuilder.buildSwitchQuery(mRealm);
         } else {
             launchRealms = QueryBuilder.buildSwitchQuery(this, mRealm, true);
         }

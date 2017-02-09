@@ -77,6 +77,8 @@
             android:theme="@style/CustomPreferenceTheme" />
         <activity android:name=".orbiter.OrbiterDetailActivity" />
         <activity android:name=".launcher.LauncherDetailActivity" />
+        <activity android:name=".subscriptions.SubscriptionActivity"
+          android:theme="@style/Subscription"/>
 
         <service
             android:name=".content.services.LaunchDataService"

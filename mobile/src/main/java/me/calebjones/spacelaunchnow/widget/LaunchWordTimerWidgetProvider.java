@@ -15,7 +15,6 @@ import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import me.calebjones.spacelaunchnow.R;
 import me.calebjones.spacelaunchnow.content.database.ListPreferences;
 import me.calebjones.spacelaunchnow.content.database.SwitchPreferences;
@@ -88,16 +87,7 @@ public class LaunchWordTimerWidgetProvider extends AppWidgetProvider {
             mRealm = Realm.getDefaultInstance();
         }
 
-        RealmResults<Launch> launchRealms;
-        if (switchPreferences.getAllSwitch()) {
-            launchRealms = mRealm.where(Launch.class)
-                    .greaterThanOrEqualTo("net", date)
-                    .findAllSorted("net", Sort.ASCENDING);
-            Timber.v("loadLaunches - Realm query created.");
-        } else {
-            launchRealms = QueryBuilder.buildSwitchQuery(context, mRealm);
-            Timber.v("loadLaunches - Filtered Realm query created.");
-        }
+        RealmResults<Launch> launchRealms = QueryBuilder.buildSwitchQuery(mRealm);
 
         for (Launch launch : launchRealms) {
             if (launch.getNetstamp() != 0) {

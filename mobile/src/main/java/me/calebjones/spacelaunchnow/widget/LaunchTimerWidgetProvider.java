@@ -16,7 +16,6 @@ import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import me.calebjones.spacelaunchnow.R;
 import me.calebjones.spacelaunchnow.content.database.ListPreferences;
 import me.calebjones.spacelaunchnow.content.database.SwitchPreferences;
@@ -26,7 +25,6 @@ import me.calebjones.spacelaunchnow.data.models.realm.Launch;
 import me.calebjones.spacelaunchnow.launchdetail.activity.LaunchDetailActivity;
 import me.calebjones.spacelaunchnow.utils.Utils;
 import timber.log.Timber;
-
 
 public class LaunchTimerWidgetProvider extends AppWidgetProvider {
 
@@ -66,8 +64,10 @@ public class LaunchTimerWidgetProvider extends AppWidgetProvider {
                 mRealm.close();
             }
         } else {
-            setRefreshIntentInitial(context, new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_timer_dark));
+            setRefreshIntentInitial(context, new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_timer_dark
+            ));
         }
     }
 
@@ -75,7 +75,6 @@ public class LaunchTimerWidgetProvider extends AppWidgetProvider {
     public void onEnabled(Context context) {
         Timber.v("Widget placed, starting service...");
     }
-
 
     @Override
     public void onDisabled(Context context) {
@@ -92,16 +91,7 @@ public class LaunchTimerWidgetProvider extends AppWidgetProvider {
             mRealm = Realm.getDefaultInstance();
         }
 
-        RealmResults<Launch> launchRealms;
-        if (switchPreferences.getAllSwitch()) {
-            launchRealms = mRealm.where(Launch.class)
-                    .greaterThanOrEqualTo("net", date)
-                    .findAllSorted("net", Sort.ASCENDING);
-            Timber.v("loadLaunches - Realm query created.");
-        } else {
-            launchRealms = QueryBuilder.buildSwitchQuery(context, mRealm);
-            Timber.v("loadLaunches - Filtered Realm query created.");
-        }
+        RealmResults<Launch> launchRealms = QueryBuilder.buildSwitchQuery(mRealm);
 
         for (Launch launch : launchRealms) {
             if (launch.getNetstamp() != 0) {
@@ -124,16 +114,21 @@ public class LaunchTimerWidgetProvider extends AppWidgetProvider {
         Timber.v("Size: [%s-%s] x [%s-%s]", minWidth, maxWidth, minHeight, maxHeight);
 
         if (minWidth <= 200 || minHeight <= 100) {
-            remoteViews = new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_timer_small_dark);
+            remoteViews = new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_timer_small_dark
+            );
         } else if (minWidth <= 320) {
-            remoteViews = new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_timer_dark);
+            remoteViews = new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_timer_dark
+            );
         } else {
-            remoteViews = new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_timer_large_dark);
+            remoteViews = new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_timer_large_dark
+            );
         }
-
 
         if (minWidth > 0 && maxWidth > 0 && minHeight > 0 && maxHeight > 0) {
             if (launch != null) {
@@ -178,8 +173,10 @@ public class LaunchTimerWidgetProvider extends AppWidgetProvider {
         if (!ListPreferences.getInstance(context).getFirstBoot()) {
             updateAppWidget(context, appWidgetManager, appWidgetId, newOptions);
         } else {
-            setRefreshIntentInitial(context, new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_timer_dark));
+            setRefreshIntentInitial(context, new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_timer_dark
+            ));
         }
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
     }
@@ -198,8 +195,10 @@ public class LaunchTimerWidgetProvider extends AppWidgetProvider {
                 super.onReceive(context, intent);
             }
         } else {
-            setRefreshIntentInitial(context, new RemoteViews(context.getPackageName(),
-                    R.layout.widget_launch_word_timer_dark));
+            setRefreshIntentInitial(context, new RemoteViews(
+                    context.getPackageName(),
+                    R.layout.widget_launch_word_timer_dark
+            ));
         }
     }
 
@@ -298,7 +297,6 @@ public class LaunchTimerWidgetProvider extends AppWidgetProvider {
                 } else {
                     seconds = String.valueOf(longSeconds);
                 }
-
 
                 // Update the views
                 if (Integer.valueOf(days) > 99) {

@@ -16,19 +16,22 @@ import java.util.Locale;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import me.calebjones.spacelaunchnow.BuildConfig;
 import me.calebjones.spacelaunchnow.R;
 import me.calebjones.spacelaunchnow.content.database.ListPreferences;
 import me.calebjones.spacelaunchnow.content.database.SwitchPreferences;
-import me.calebjones.spacelaunchnow.data.models.realm.Launch;
-import me.calebjones.spacelaunchnow.data.networking.interfaces.LibraryRequestInterface;
 import me.calebjones.spacelaunchnow.content.jobs.UpdateJob;
 import me.calebjones.spacelaunchnow.content.models.Constants;
-import me.calebjones.spacelaunchnow.data.models.realm.LaunchNotification;
-import me.calebjones.spacelaunchnow.data.models.realm.UpdateRecord;
-import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.LaunchResponse;
 import me.calebjones.spacelaunchnow.content.util.QueryBuilder;
+import me.calebjones.spacelaunchnow.data.models.realm.Agency;
+import me.calebjones.spacelaunchnow.data.models.realm.AgencySwitch;
+import me.calebjones.spacelaunchnow.data.models.realm.Launch;
+import me.calebjones.spacelaunchnow.data.models.realm.LaunchNotification;
+import me.calebjones.spacelaunchnow.data.models.realm.Location;
+import me.calebjones.spacelaunchnow.data.models.realm.LocationSwitch;
+import me.calebjones.spacelaunchnow.data.models.realm.UpdateRecord;
+import me.calebjones.spacelaunchnow.data.networking.interfaces.LibraryRequestInterface;
+import me.calebjones.spacelaunchnow.data.networking.responses.launchlibrary.LaunchResponse;
 import me.calebjones.spacelaunchnow.utils.Connectivity;
 import me.calebjones.spacelaunchnow.utils.FileUtils;
 import me.calebjones.spacelaunchnow.utils.Utils;
@@ -112,8 +115,12 @@ public class LaunchDataService extends BaseService {
                         rocketIntent.setAction(Constants.ACTION_GET_VEHICLES_DETAIL);
                         startService(rocketIntent);
 
-                        startService(new Intent(this, MissionDataService.class));
-                        this.startService(new Intent(this, NextLaunchTracker.class));
+
+                        Intent libraryIntent = new Intent(getApplicationContext(), LibraryDataService.class);
+                        libraryIntent.setAction(Constants.ACTION_GET_ALL_DATA);
+                        startService(libraryIntent);
+
+                        startService(new Intent(this, NextLaunchTracker.class));
                     }
                 }
             } else if (Constants.ACTION_UPDATE_LAUNCH.equals(action)) {
@@ -168,6 +175,8 @@ public class LaunchDataService extends BaseService {
             Timber.e("LaunchDataService - onHandleIntent: ERROR - Unknown Intent");
 
         }
+
+        syncSwitchState(mRealm);
         Timber.v("Finished!");
         mRealm.close();
     }
@@ -200,6 +209,31 @@ public class LaunchDataService extends BaseService {
 
         }
         return success;
+    }
+
+    private static void syncSwitchState(Realm realm) {
+        RealmResults<LocationSwitch> locationSwitches = realm.where(LocationSwitch.class).findAll();
+        RealmResults<AgencySwitch> agencySwitches = realm.where(AgencySwitch.class).findAll();
+
+        for (LocationSwitch locationSwitch : locationSwitches) {
+            Location location = realm.where(Location.class).equalTo("id", locationSwitch.getId()).findFirst();
+            if (location != null) {
+                realm.beginTransaction();
+                location.setSubscribed(locationSwitch.isSubscribed());
+                realm.copyToRealmOrUpdate(location);
+                realm.commitTransaction();
+            }
+        }
+
+        for (AgencySwitch agencySwitch : agencySwitches) {
+            Agency agency = realm.where(Agency.class).equalTo("id", agencySwitch.getId()).findFirst();
+            if (agency != null) {
+                realm.beginTransaction();
+                agency.setSubscribed(agencySwitch.isSubscribed());
+                realm.copyToRealmOrUpdate(agency);
+                realm.commitTransaction();
+            }
+        }
     }
 
     private static void checkFullSync(Context context) {
@@ -281,13 +315,7 @@ public class LaunchDataService extends BaseService {
         SwitchPreferences switchPreferences = SwitchPreferences.getInstance(context);
         Realm mRealm = Realm.getDefaultInstance();
 
-        if (switchPreferences.getAllSwitch()) {
-            launchRealms = mRealm.where(Launch.class)
-                    .greaterThanOrEqualTo("net", date)
-                    .findAllSorted("net", Sort.ASCENDING);
-        } else {
-            launchRealms = QueryBuilder.buildSwitchQuery(context, mRealm);
-        }
+        launchRealms = QueryBuilder.buildSwitchQuery(mRealm);
 
         for (final Launch launchrealm : launchRealms) {
             if (!launchrealm.isUserToggledNotifiable() && !launchrealm.isNotifiable()) {
@@ -332,9 +360,6 @@ public class LaunchDataService extends BaseService {
                 } else {
                     throw new IOException(launchResponse.errorBody().string());
                 }
-            }
-            for (Launch item : items) {
-                item.getLocation().setPrimaryID();
             }
             mRealm.beginTransaction();
             mRealm.copyToRealmOrUpdate(items);
@@ -430,7 +455,6 @@ public class LaunchDataService extends BaseService {
                     item.setSyncCalendar(previous.syncCalendar());
                     item.setLaunchTimeStamp(previous.getLaunchTimeStamp());
                 }
-                item.getLocation().setPrimaryID();
                 mRealm.copyToRealmOrUpdate(item);
                 mRealm.commitTransaction();
             }
@@ -522,7 +546,6 @@ public class LaunchDataService extends BaseService {
                     item.setIsNotifiedHour(previous.getIsNotifiedHour());
                     item.setIsNotifiedTenMinute(previous.getIsNotifiedTenMinute());
                 }
-                item.getLocation().setPrimaryID();
                 mRealm.beginTransaction();
                 mRealm.copyToRealmOrUpdate(item);
                 mRealm.commitTransaction();
@@ -694,7 +717,6 @@ public class LaunchDataService extends BaseService {
                         item.setIsNotifiedTenMinute(previous.getIsNotifiedTenMinute());
                     }
                     mRealm.beginTransaction();
-                    item.getLocation().setPrimaryID();
                     mRealm.copyToRealmOrUpdate(item);
                     mRealm.commitTransaction();
                     Timber.v("Updated launch: %s", item.getId());
