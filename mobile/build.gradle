@@ -264,4 +264,11 @@ dependencies {
     implementation 'com.github.pwittchen:weathericonview:1.1.0'
     implementation 'com.mikepenz:fontawesome-typeface:4.7.0.0@aar'
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
+
+
+    //Dagger
+    compile 'com.google.dagger:dagger-android:2.11'
+    compile 'com.google.dagger:dagger-android-support:2.11' // if you use the support libraries
+    annotationProcessor 'com.google.dagger:dagger-android-processor:2.11'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
 }

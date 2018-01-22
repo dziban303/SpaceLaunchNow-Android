@@ -24,6 +24,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
+import javax.inject.Singleton;
+
 import io.realm.Realm;
 import io.realm.RealmResults;
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -40,19 +42,22 @@ import timber.log.Timber;
 
 import static me.calebjones.spacelaunchnow.data.models.Constants.*;
 
+@Singleton
 public class WearWatchfaceManager extends BaseManager {
 
+    private SharedPreferences sharedPref;
     private Context context;
 
     public WearWatchfaceManager(Context context) {
         super(context);
         this.context = context;
+//        this.sharedPref = sharedPref;
     }
 
     // Create a data map and put data in it
     public void updateWear() {
         mRealm = Realm.getDefaultInstance();
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 
         try {
             RealmResults<Launch> launches = QueryBuilder.buildSwitchQuery(context, mRealm);
