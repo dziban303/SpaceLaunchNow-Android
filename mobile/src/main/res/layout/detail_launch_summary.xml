@@ -59,10 +59,10 @@
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
-                    <FrameLayout
+                    <com.pierfrancescosoffritti.youtubeplayer.player.YouTubePlayerView
                         android:id="@+id/youtube_view"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"/>
 
                 </LinearLayout>
 

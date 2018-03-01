@@ -56,10 +56,11 @@
                         android:textStyle="bold"
                         android:visibility="gone" />
 
-                    <FrameLayout
+                    <com.pierfrancescosoffritti.youtubeplayer.player.YouTubePlayerView
                         android:id="@+id/youtube_view"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"/>
+
 
                 </LinearLayout>
 

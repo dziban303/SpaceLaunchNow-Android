@@ -31,7 +31,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.youtube.player.YouTubePlayer;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -114,7 +113,6 @@ public class LaunchDetailActivity extends BaseActivity
     private Context context;
     private TabsAdapter tabAdapter;
     private int statusColor;
-    public YouTubePlayer youTubePlayer;
     public boolean isYouTubePlayerFullScreen;
     public String response;
     public Launch launch;
@@ -659,8 +657,8 @@ public class LaunchDetailActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
-        if (youTubePlayer != null && isYouTubePlayerFullScreen){
-            youTubePlayer.setFullscreen(false);
+        if (isYouTubePlayerFullScreen){
+
         } else {
             super.onBackPressed();
         }
