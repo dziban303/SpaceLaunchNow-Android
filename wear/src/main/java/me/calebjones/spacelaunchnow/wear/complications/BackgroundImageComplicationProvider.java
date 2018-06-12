@@ -3,7 +3,7 @@ package me.calebjones.spacelaunchnow.wear.complications;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.support.wearable.complications.ComplicationData;
 import android.support.wearable.complications.ComplicationManager;
 import android.support.wearable.complications.ComplicationProviderService;

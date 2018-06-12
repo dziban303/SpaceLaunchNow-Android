@@ -2,8 +2,8 @@ package me.calebjones.spacelaunchnow.wear.ui.launch;
 
 import android.app.FragmentManager;
 import android.os.Bundle;
-import android.support.wear.widget.drawer.WearableDrawerLayout;
-import android.support.wear.widget.drawer.WearableNavigationDrawerView;
+import androidx.wear.widget.drawer.WearableDrawerLayout;
+import androidx.wear.widget.drawer.WearableNavigationDrawerView;
 import android.support.wearable.activity.WearableActivity;
 
 import butterknife.BindView;

@@ -1,7 +1,7 @@
 package me.calebjones.spacelaunchnow.common;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import io.realm.Realm;
 import me.calebjones.spacelaunchnow.utils.analytics.Analytics;

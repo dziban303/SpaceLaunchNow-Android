@@ -2,10 +2,10 @@ package me.calebjones.spacelaunchnow.wear.ui.launch;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.wear.widget.WearableRecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.wear.widget.WearableRecyclerView;
 import android.support.wearable.view.CircularButton;
 import android.view.LayoutInflater;
 import android.view.View;

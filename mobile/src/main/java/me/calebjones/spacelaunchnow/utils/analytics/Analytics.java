@@ -3,9 +3,9 @@ package me.calebjones.spacelaunchnow.utils.analytics;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.core.app.NotificationCompat;
 
 import com.crashlytics.android.answers.AddToCartEvent;
 import com.crashlytics.android.answers.Answers;

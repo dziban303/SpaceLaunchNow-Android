@@ -2,7 +2,7 @@ package me.calebjones.spacelaunchnow.utils.views;
 
 import android.graphics.Color;
 import android.os.Build;
-import android.support.design.widget.AppBarLayout;
+import com.google.android.material.appbar.AppBarLayout;
 import android.view.Window;
 import android.view.WindowManager;
 import me.calebjones.spacelaunchnow.utils.Utils;
